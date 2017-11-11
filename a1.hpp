@@ -20,14 +20,14 @@ int connected_components(std::vector<signed char>& A, int n, int q, const char* 
     int col = rank % q;
     int row = rank / q;
 
-    std::vector<int> p; // Initial P Vector
-    std::vector<int> p_prime(len*len,0); // P vector after opportunistic pointer jumping
-    std::vector<int> pTreeHanging; // P vector after Tree hanging
-    std::vector<int> m(len*len,0); // Helper matrix
-    std::vector<int> c(len*len,0); // Helper matrix
-    std::vector<int> vectorQ(len*len,0); // Helper matrix
+    std::vector<int> p;                     // Initial P Vector
+    std::vector<int> p_prime(len*len,0);    // P vector after opportunistic pointer jumping
+    std::vector<int> pTreeHanging;          // P vector after Tree hanging
+    std::vector<int> m(len*len,0);          // Helper matrix
+    std::vector<int> c(len*len,0);          // Helper matrix
+    std::vector<int> vectorQ(len*len,0);    // Helper matrix
     std::vector<int> fullPVector(n*n,0); 
-    //int diff = 1; // if there is difference in initial p vector and p tree hanging vector. Initialised as true
+    //int diff = 1;                         // if there is difference in initial p vector and p tree hanging vector. Initialised as true
 
     // j*len + i -> row wise
     // i*len + j -> column wise
@@ -51,20 +51,10 @@ int connected_components(std::vector<signed char>& A, int n, int q, const char* 
 
     //To get sync with all ranks
     barrier();
-    sleep(rank);
 
     // while(diff)
     // {
-        diff = 0;
-        std::cout<<"P :\n";
-        std::cout<<"Rank :"<<rank<<"\n";
-        for (int i = 0; i < len; ++i) {
-            for (int j = 0; j < len; ++j)
-            std::cout << p[(i * len) + j] << " ";
-            std::cout << std::endl;
-        }
-
-        barrier();
+        //diff = 0;
         //Finding max sequentially
         for (int i = 0; i < len; ++i) 
         {
@@ -93,15 +83,17 @@ int connected_components(std::vector<signed char>& A, int n, int q, const char* 
             p[i] = m[i];
 
         barrier();
-        sleep(rank);
 
+        /*//############################@Printing PInit Vector@############################
+        sleep(rank);
         std::cout<<"PInit : \n";                // PInit which is first step in Algorithm
         std::cout<<"Rank :"<<rank<<"\n";
-        for (int i = 0; i < len; ++i) {
+        for (int i = 0; i < len; ++i) 
+        {
             for (int j = 0; j < len; ++j)
             std::cout << p[i * len + j] << " ";
             std::cout << std::endl;
-        }
+        } */
 
         barrier();
 
@@ -112,17 +104,6 @@ int connected_components(std::vector<signed char>& A, int n, int q, const char* 
                 m[i]=p[i];
             else
                 m[i] = 0;
-        }
-
-        barrier();
-        sleep(rank);
-
-        std::cout<<"M : \n";
-        std::cout<<"Rank :"<<rank<<"\n";
-        for (int i = 0; i < len; ++i) {
-            for (int j = 0; j < len; ++j)
-            std::cout << m[i * len + j] << " ";
-            std::cout << std::endl;
         }
 
         barrier();
@@ -149,17 +130,6 @@ int connected_components(std::vector<signed char>& A, int n, int q, const char* 
         MPI_Comm_free(&com_row);
 
         barrier();
-        sleep(rank);
-
-        std::cout<<"vectorQ : \n";
-        std::cout<<"Rank :"<<rank<<"\n";
-        for (int i = 0; i < len; ++i) {
-            for (int j = 0; j < len; ++j)
-            std::cout << vectorQ[i * len + j] << " ";
-            std::cout << std::endl;
-        }
-
-        barrier();
 
         //Computing vector M now to find the opportunistic pointer jumping vector P
         for(int i=0;i<len;i++)
@@ -177,33 +147,6 @@ int connected_components(std::vector<signed char>& A, int n, int q, const char* 
             }
         }
 
-        /*
-        for(int i = 0; i < len ; i++)
-        {
-            for(int j = 0; j < len; j++)
-            {
-                if(c[j+(len * i)] == j + ((rank / q) * len))
-                    m[j+(len * i)] = p[j+(len * i)];
-                else 
-                    m[j+(len * i)] = 0;
-                // if((i + ((rank / q) * len)) == 6)
-                //     std::cout<<"P: "<<p[j+(len * i)]<<"::"<<"PPrime: "<<p_prime[j+(len * i)]<<std::endl;
-            }
-        } */
-
-
-
-        barrier();
-        sleep(rank);
-
-        std::cout<<"M1 : \n";
-        std::cout<<"Rank :"<<rank<<"\n";
-        for (int i = 0; i < len; ++i) {
-            for (int j = 0; j < len; ++j)
-            std::cout << m[i * len + j] << " ";
-            std::cout << std::endl;
-        }
-
         barrier();
 
         //Finding max sequentially
@@ -218,7 +161,6 @@ int connected_components(std::vector<signed char>& A, int n, int q, const char* 
             {
                 m[i*len+j] = max;
             }
-
         }
         barrier();
 
@@ -228,19 +170,19 @@ int connected_components(std::vector<signed char>& A, int n, int q, const char* 
         MPI_Comm_free(&com_row);
 
         barrier();
-        sleep(rank);
 
+        /*//############################@Printing PPrime Vector@############################
+        sleep(rank);
         std::cout<<"PPrime : \n";                               // PPrime which is second step in Algorithm
         std::cout<<"Rank :"<<rank<<"\n";
-        for (int i = 0; i < len; ++i) {
+        for (int i = 0; i < len; ++i) 
+        {
             for (int j = 0; j < len; ++j)
             std::cout << p_prime[i * len + j] << " ";
             std::cout << std::endl;
-        }
+        }*/
 
         // Tree Hanging step
-
-        sleep(rank);
         barrier();
 
         for(int i = 0; i < len ; i++)
@@ -251,24 +193,10 @@ int connected_components(std::vector<signed char>& A, int n, int q, const char* 
                     m[j+(len * i)] = p_prime[j+(len * i)];
                 else 
                     m[j+(len * i)] = 0;
-                // if((i + ((rank / q) * len)) == 6)
-                //     std::cout<<"P: "<<p[j+(len * i)]<<"::"<<"PPrime: "<<p_prime[j+(len * i)]<<std::endl;
             }
         }
 
         barrier();
-        sleep(rank);
-
-        std::cout<<"MTreeHanging : \n";
-        std::cout<<"Rank :"<<rank<<"\n";
-        for (int i = 0; i < len; ++i) {
-            for (int j = 0; j < len; ++j)
-            std::cout << m[i * len + j] << " ";
-            std::cout << std::endl;
-        }
-
-        barrier();
-        sleep(rank);
 
         //Finding max sequentially
         for (int i = 0; i < len; ++i) {
@@ -292,17 +220,6 @@ int connected_components(std::vector<signed char>& A, int n, int q, const char* 
         MPI_Comm_free(&com_row);
 
         barrier();
-        sleep(rank);
-
-        std::cout<<"CTreeHanging : \n";
-        std::cout<<"Rank :"<<rank<<"\n";
-        for (int i = 0; i < len; ++i) {
-            for (int j = 0; j < len; ++j)
-            std::cout << c[i * len + j] << " ";
-            std::cout << std::endl;
-        }
-
-        barrier();
 
         //Finding pTreeHanging vector after Tree Hanging step.
         for(int i=0 ; i< len; i++)
@@ -317,11 +234,14 @@ int connected_components(std::vector<signed char>& A, int n, int q, const char* 
         }
 
         barrier();
-        sleep(rank);
 
-        std::cout<<"PTreeHanging : \n";                     // PTreeHanging which is third step in Algorithm
-        std::cout<<"Rank :"<<rank<<"\n";
-        for (int i = 0; i < len; ++i) {
+        //############################@Printing PTreeHanging Vector@############################
+        sleep(rank);
+        if(rank == 0)
+            std::cout<<"PTreeHanging : "<<std::endl;                     // PTreeHanging which is third step in Algorithm
+        std::cout<<"Rank - "<<rank<<std::endl;
+        for (int i = 0; i < len; ++i)
+        {
             for (int j = 0; j < len; ++j)
             std::cout << pTreeHanging[i * len + j] << " ";
             std::cout << std::endl;
